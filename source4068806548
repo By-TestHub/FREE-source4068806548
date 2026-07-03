@@ -1,0 +1,418 @@
+local AllowedUsers = {
+    "Goopro_67",
+    "Kaprao_67",
+	"",
+	"",
+	"",
+	"",
+    ""
+}
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Username = LocalPlayer.Name 
+local IsAllowed = false
+
+for _, name in pairs(AllowedUsers) do
+    if Username == name then 
+        IsAllowed = true
+        break
+    end
+end
+
+if not IsAllowed then
+    LocalPlayer:Kick("By TEST HUB: คุณไม่มีสิทธิ์ใช้งานสคริปต์นี้ !")
+    return
+end
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/By-TestHub/Kavo-UI-Library/refs/heads/main/source.lua"))()
+local colors = {
+    SchemeColor = Color3.fromRGB(120, 220, 255),
+    Background = Color3.fromRGB(0, 0, 0),
+    Header = Color3.fromRGB(0, 0, 0),
+    TextColor = Color3.fromRGB(255,255,255),
+    ElementColor = Color3.fromRGB(20, 20, 20)
+}
+local Window = Library.CreateLib("TEST HUB | รวมหลายฟังก์ชันฟรี", colors)
+local Tab = Window:NewTab("ผู้เล่น")
+local Tab2 = Window:NewTab("บิน")
+local Tab3 = Window:NewTab("เกรียน")
+local Tab4 = Window:NewTab("อธิบาย + ตั้งค่า")
+local Section = Tab:NewSection("ฟังก์ชันผู้เล่น")
+local Section2 = Tab2:NewSection("ฟังก์ชันบิน")
+local Section3 = Tab3:NewSection("ฟังก์ชันเกรียน")
+local Section4 = Tab4:NewSection("สคริปสร้างโดย TEST HUB")
+local fpsLabel = Section4:NewLabel("FPS: กำลังคำนวณ...")
+
+local lastTime = os.clock()
+local frameCount = 0
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local currentTime = os.clock()
+    
+    if currentTime - lastTime >= 0.3 then
+        local fps = math.floor(frameCount / (currentTime - lastTime))
+        
+        fpsLabel:UpdateLabel("FPS: " .. fps)
+        
+        lastTime = currentTime
+        frameCount = 0
+    end
+end)
+
+Section:NewTextBox("ปรับค่าวิ่งไว", "", function(txt)
+    local speed = tonumber(txt) 
+    if speed then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    else
+    end
+end)
+
+Section:NewButton("รีเซ็ตค่าวิ่งเร็วให้เหลือ 16", "", function()
+game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+end)
+
+Section:NewTextBox("ปรับค่ากระโดดสูง", "", function(txt)
+    local jump = tonumber(txt)
+    if jump then
+        local hum = game.Players.LocalPlayer.Character.Humanoid
+        hum.UseJumpPower = true
+        hum.JumpPower = jump
+    else
+    end
+end)
+
+Section:NewButton("รีเซ็ตค่ากระโดดสูงให้เหลือ 50", "", function()
+game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+end)
+
+local infiniteJumpActive = false
+local UIS = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+
+local function doInfiniteJump()
+    if infiniteJumpActive then
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+
+UIS.JumpRequest:Connect(doInfiniteJump)
+
+Section:NewToggle("กระโดดได้ไม่จำกัด", "", function(state)
+    infiniteJumpActive = state
+end)
+
+local noclipActive = false
+local runService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+local noclipConnection = runService.Stepped:Connect(function()
+    if noclipActive and player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide == true then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+Section:NewToggle("เดินทะลุกำแพง", "", function(state)
+    noclipActive = state
+    
+    if not state and player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end)
+
+Section2:NewButton("บินแบบ FLY GUI V3 ไม่ทะลุกำแพง", "", function()
+loadstring(game:HttpGet("https://pastebin.com/raw/2RiADZZu"))()
+end)
+
+Section2:NewButton("บินแบบ FLY GUI V4 ไม่ทะลุกำแพง", "", function()
+loadstring(game:HttpGet("https://pastebin.com/raw/n6Q5TNyg"))()
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local flying = false
+local noclipMode = false 
+local speed = 80 
+local bv, bg
+
+local function toggleFly(state, noclip)
+    flying = state
+    noclipMode = noclip
+    local character = player.Character
+    if not character then return end
+    
+    local root = character:FindFirstChild("HumanoidRootPart")
+    local hum = character:FindFirstChild("Humanoid")
+    
+    if flying and root and hum then
+        bv = Instance.new("BodyVelocity", root)
+        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bv.Velocity = Vector3.zero
+        
+        bg = Instance.new("BodyGyro", root)
+        bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bg.P = 10000
+        bg.D = 100
+        bg.CFrame = root.CFrame
+        
+        hum.PlatformStand = true
+    else
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+        if hum then hum.PlatformStand = false end
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if flying and player.Character then
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+        local hum = player.Character:FindFirstChild("Humanoid")
+        local cam = workspace.CurrentCamera
+        
+        if root and hum and bv and bg then
+            local moveDir = hum.MoveDirection
+            if moveDir.Magnitude > 0 then
+                local camLook = cam.CFrame.LookVector
+                local flatLook = Vector3.new(camLook.X, 0, camLook.Z).Unit
+                local camRight = cam.CFrame.RightVector
+                local flatRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
+                
+                local forwardIntent = moveDir:Dot(flatLook)
+                local rightIntent = moveDir:Dot(flatRight)
+                local flyDir = (cam.CFrame.LookVector * forwardIntent) + (cam.CFrame.RightVector * rightIntent)
+                bv.Velocity = flyDir * speed 
+            else
+                bv.Velocity = Vector3.zero
+            end
+            bg.CFrame = cam.CFrame
+        end
+    end
+end)
+
+Section2:NewToggle("บินแบบปกติไม่ทะลุกำแพง", "", function(state)
+    toggleFly(state, false)
+end)
+
+Section2:NewTextBox("ปรับความเร็วบินแบบปกติ", "" .. speed, function(txt)
+    local s = tonumber(txt)
+    if s then 
+        speed = s 
+    end
+end)
+
+Section3:NewButton("เสกของ", "", function()
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+local TextButton = Instance.new("TextButton")
+local TextLabel = Instance.new("TextLabel")
+local TextButton_2 = Instance.new("TextButton")
+
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+
+Frame.Parent = ScreenGui
+Frame.Active = true
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.Position = UDim2.new(0.0610425249, 0, 0.0939490423, 0)
+Frame.Size = UDim2.new(0, 218, 0, 225)
+
+ScrollingFrame.Parent = Frame
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.Position = UDim2.new(0.0871559605, 0, 0.155555561, 0)
+ScrollingFrame.Size = UDim2.new(0, 187, 0, 136)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 35, 0)
+
+UIListLayout.Parent = ScrollingFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+TextButton.Parent = ScrollingFrame
+TextButton.BackgroundColor3 = Color3.fromRGB(117, 117, 117)
+TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.Size = UDim2.new(0, 155, 0, 39)
+TextButton.Visible = false
+TextButton.Font = Enum.Font.SourceSans
+TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.TextSize = 20.000
+TextButton.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.TextStrokeTransparency = 0.000
+TextButton.TextWrapped = true
+
+TextLabel.Parent = Frame
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.Position = UDim2.new(-0.00129664713, 0, -0.000140406293, 0)
+TextLabel.Size = UDim2.new(0, 218, 0, 25)
+TextLabel.Font = Enum.Font.SourceSans
+TextLabel.Text = "Tool Giver"
+TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.TextSize = 14.000
+
+TextButton_2.Parent = Frame
+TextButton_2.BackgroundColor3 = Color3.fromRGB(0, 255, 30)
+TextButton_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton_2.Position = UDim2.new(0.0825688094, 0, 0.804444432, 0)
+TextButton_2.Size = UDim2.new(0, 180, 0, 30)
+TextButton_2.Font = Enum.Font.SourceSans
+TextButton_2.Text = "update list"
+TextButton_2.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextButton_2.TextSize = 14.000
+
+local function FNDR_fake_script() -- Frame.LocalScript 
+	local script = Instance.new('LocalScript', Frame)
+
+	local button = script.Parent.ScrollingFrame.TextButton
+	button.Parent = nil
+	button.Name = "slaves"
+	local function updatelist()
+		for i, v in script.Parent.ScrollingFrame:GetDescendants() do
+			if v:IsA("TextButton") then
+				v:Destroy()
+			end
+		end
+	
+		local function cloneToBackpack(toolName)
+			local clonedTool = toolName:Clone()
+			clonedTool.Parent = game:GetService("Players").LocalPlayer:WaitForChild("Backpack")
+		end
+		for i, v in pairs(game:GetDescendants()) do
+			if v:IsA("Tool") and v.Parent.Parent ~= game:GetService("Players").LocalPlayer then
+				local clonebutton = button:Clone()
+				clonebutton.Parent = script.Parent.ScrollingFrame
+				clonebutton.Visible = true
+				clonebutton.Text = v.Name
+				clonebutton.MouseButton1Click:Connect(function()
+					cloneToBackpack(v)
+				end)
+			end
+		end
+	end
+	script.Parent.TextButton.MouseButton1Click:Connect(updatelist)
+end
+coroutine.wrap(FNDR_fake_script)()
+local function SGRWUDK_fake_script() -- Frame.DragScript 
+	local script = Instance.new('LocalScript', Frame)
+
+	local UIS = game:GetService('UserInputService')
+	local frame = script.Parent
+	local dragToggle = nil
+	local dragSpeed = 0
+	local dragStart = nil
+	local startPos = nil
+	
+	local function updateInput(input)
+		local delta = input.Position - dragStart
+		local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		game:GetService('TweenService'):Create(frame, TweenInfo.new(dragSpeed), {
+			Position = position
+		}):Play()
+	end
+	
+	frame.InputBegan:Connect(function(input)
+		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
+			dragToggle = true
+			dragStart = input.Position
+			startPos = frame.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragToggle = false
+				end
+			end)
+		end
+	end)
+	
+	UIS.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			if dragToggle then
+				updateInput(input)
+			end
+		end
+	end)
+	
+end
+coroutine.wrap(SGRWUDK_fake_script)()
+end)
+
+Section3:NewButton("ชักว่าว R6", "", function()
+loadstring(game:HttpGet("https://pastefy.app/3q0ZUYSV/raw"))()
+end)
+
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+
+local flingActive = false
+local spinSpeed = 5000
+runService.Heartbeat:Connect(function()
+    if flingActive and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local root = player.Character.HumanoidRootPart
+        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+        local oldRotVel = root.RotVelocity
+        root.RotVelocity = Vector3.new(0, spinSpeed, 0)
+        
+        runService.RenderStepped:Wait()
+        root.RotVelocity = oldRotVel
+        if hum then
+            if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end
+end)
+
+Section3:NewToggle("เดินชนกระเด็น (ใช้ได้สำหรับแมพที่เดินชนกันได้เท่านั้น)", "", function(state)
+    flingActive = state
+    if state then
+    else
+    end
+end)
+
+Section4:NewButton("คัดลอกลิงค์ Discord", "คัดลอกลิงค์กลุ่ม Discord ไว้ในคลิปบอร์ด", function()
+    if setclipboard then
+        setclipboard("https://discord.gg/Ttwq9Udwhc")
+    elseif syn and syn.write_clipboard then
+        syn.write_clipboard("https://discord.gg/Ttwq9Udwhc")
+    else
+    end
+
+    game:GetService("StarterGui"):SetCore("SendNotification", { 
+        Title = "คัดลอกสำเร็จ";
+        Text = "คัดลอกลิงค์ Discord แล้ว";
+        Duration = 5;
+    })
+end)
+
+Section4:NewButton("บูส FPS ลดแสงนิด", "", function()
+    local g = game
+    local l = g.Lighting
+    l.GlobalShadows = true
+    l.Brightness = 1
+    l.FogEnd = 10000
+end)
+
+Section4:NewButton("บูส FPS ภาพเดิม", "", function()
+    local g = game
+    local l = g.Lighting
+    l.GlobalShadows = true
+    l.Brightness = 2
+    l.FogEnd = 100000
+end)
