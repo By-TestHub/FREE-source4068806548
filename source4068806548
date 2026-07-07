@@ -1,175 +1,20 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/By-TestHub/Kavo-UI-Library/refs/heads/main/source.lua"))()
-local colors = {
-    SchemeColor = Color3.fromRGB(120, 220, 255),
-    Background = Color3.fromRGB(0, 0, 0),
-    Header = Color3.fromRGB(0, 0, 0),
-    TextColor = Color3.fromRGB(255,255,255),
-    ElementColor = Color3.fromRGB(20, 20, 20)
-}
-local Window = Library.CreateLib("TEST HUB | รวมหลายฟังก์ชันฟรี", colors)
-
-local function GetKavoGui()
-    for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-        if v:IsA("ScreenGui") and (v:FindFirstChild("Main") or v.Name == "Kavo") then 
-            return v
-        end
-    end
-    for _, v in pairs(game.Players.LocalPlayer:WaitForChild("PlayerGui"):GetChildren()) do
-        if v:IsA("ScreenGui") and (v:FindFirstChild("Main") or v.Name == "Kavo") then 
-            return v
-        end
-    end
-    return nil
-end
-
-local function createToggleButton(imageAsset, callback)
-    if getgenv().OpenGuiButton then getgenv().OpenGuiButton:Destroy() end
-    
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "ToggleGui_Kaprao"
-    gui.Parent = (gethui and gethui()) or game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    gui.IgnoreGuiInset = true
-    gui.ResetOnSpawn = false
-    
-    local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0, 35, 0, 35)
-    frame.Position = UDim2.new(0, 20, 0, 150)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BackgroundTransparency = 0.1
-    frame.Active = true
-    
-    local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 8) 
-    
-    local btn = Instance.new("ImageButton", frame)
-    btn.Size = UDim2.new(0, 23, 0, 23)
-    btn.Position = UDim2.new(0, 6, 0, 6)
-    btn.BackgroundTransparency = 1
-    btn.Image = imageAsset
-    
-    local dragging, dragStart, startPos
-    local hasDragged = false
-    
-    btn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-            hasDragged = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            if delta.Magnitude > 7 then
-                hasDragged = true
-            end
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    btn.Activated:Connect(function()
-        if not hasDragged then
-            callback()
-        end
-    end)
-    
-    getgenv().OpenGuiButton = gui
-end
-
-createToggleButton("rbxassetid://117649776522765", function()
-    local kavoGui = GetKavoGui()
-    if kavoGui then
-        kavoGui.Enabled = not kavoGui.Enabled
-    else
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.RightControl, false, game)
-    end
-end)
-
-local Tab = Window:NewTab("ผู้เล่น")
-local Tab2 = Window:NewTab("บิน")
-local Tab3 = Window:NewTab("เกรียน")
-local Tab4 = Window:NewTab("อธิบาย + ตั้งค่า")
-local Section = Tab:NewSection("ฟังก์ชันผู้เล่น")
-local Section2 = Tab2:NewSection("ฟังก์ชันบิน")
-local Section3 = Tab3:NewSection("ฟังก์ชันเกรียน")
-local Section4 = Tab4:NewSection("สคริปสร้างโดย TEST HUB")
-local fpsLabel = Section4:NewLabel("FPS: กำลังคำนวณ...")
-
-local lastTime = os.clock()
-local frameCount = 0
-
-game:GetService("RunService").RenderStepped:Connect(function()
-    frameCount = frameCount + 1
-    local currentTime = os.clock()
-    
-    if currentTime - lastTime >= 0.3 then
-        local fps = math.floor(frameCount / (currentTime - lastTime))
-        
-        fpsLabel:UpdateLabel("FPS: " .. fps)
-        
-        lastTime = currentTime
-        frameCount = 0
-    end
-end)
-
-Section:NewTextBox("ปรับค่าวิ่งไว", "", function(txt)
-    local speed = tonumber(txt) 
-    if speed then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    else
-    end
-end)
-
-Section:NewButton("รีเซ็ตค่าวิ่งเร็วให้เหลือ 16", "", function()
-game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-end)
-
-Section:NewTextBox("ปรับค่ากระโดดสูง", "", function(txt)
-    local jump = tonumber(txt)
-    if jump then
-        local hum = game.Players.LocalPlayer.Character.Humanoid
-        hum.UseJumpPower = true
-        hum.JumpPower = jump
-    else
-    end
-end)
-
-Section:NewButton("รีเซ็ตค่ากระโดดสูงให้เหลือ 50", "", function()
-game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
-end)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
 local infiniteJumpActive = false
-local UIS = game:GetService("UserInputService")
-local player = game.Players.LocalPlayer
-
-local function doInfiniteJump()
+UIS.JumpRequest:Connect(function()
     if infiniteJumpActive then
         local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
             humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
-end
-
-UIS.JumpRequest:Connect(doInfiniteJump)
-
-Section:NewToggle("กระโดดได้ไม่จำกัด", "", function(state)
-    infiniteJumpActive = state
 end)
 
 local noclipActive = false
-local runService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-
-local noclipConnection = runService.Stepped:Connect(function()
+RunService.Stepped:Connect(function()
     if noclipActive and player.Character then
         for _, part in pairs(player.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide == true then
@@ -179,38 +24,12 @@ local noclipConnection = runService.Stepped:Connect(function()
     end
 end)
 
-Section:NewToggle("เดินทะลุกำแพง", "", function(state)
-    noclipActive = state
-    
-    if not state and player.Character then
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-    end
-end)
-
-Section2:NewButton("บินแบบ FLY GUI V3 ไม่ทะลุกำแพง", "", function()
-loadstring(game:HttpGet("https://pastebin.com/raw/2RiADZZu"))()
-end)
-
-Section2:NewButton("บินแบบ FLY GUI V4 ไม่ทะลุกำแพง", "", function()
-loadstring(game:HttpGet("https://pastebin.com/raw/n6Q5TNyg"))()
-end)
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-
 local flying = false
-local noclipMode = false 
 local speed = 80 
 local bv, bg
 
-local function toggleFly(state, noclip)
+local function toggleFly(state)
     flying = state
-    noclipMode = noclip
     local character = player.Character
     if not character then return end
     
@@ -262,173 +81,16 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-Section2:NewToggle("บินแบบปกติไม่ทะลุกำแพง", "", function(state)
-    toggleFly(state, false)
-end)
-
-Section2:NewTextBox("ปรับความเร็วบินแบบปกติ", "" .. speed, function(txt)
-    local s = tonumber(txt)
-    if s then 
-        speed = s 
-    end
-end)
-
-Section3:NewButton("เสกของ", "", function()
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local ScrollingFrame = Instance.new("ScrollingFrame")
-local UIListLayout = Instance.new("UIListLayout")
-local TextButton = Instance.new("TextButton")
-local TextLabel = Instance.new("TextLabel")
-local TextButton_2 = Instance.new("TextButton")
-
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
-
-Frame.Parent = ScreenGui
-Frame.Active = true
-Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Frame.Position = UDim2.new(0.0610425249, 0, 0.0939490423, 0)
-Frame.Size = UDim2.new(0, 218, 0, 225)
-
-ScrollingFrame.Parent = Frame
-ScrollingFrame.Active = true
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ScrollingFrame.Position = UDim2.new(0.0871559605, 0, 0.155555561, 0)
-ScrollingFrame.Size = UDim2.new(0, 187, 0, 136)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 35, 0)
-
-UIListLayout.Parent = ScrollingFrame
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-TextButton.Parent = ScrollingFrame
-TextButton.BackgroundColor3 = Color3.fromRGB(117, 117, 117)
-TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextButton.Size = UDim2.new(0, 155, 0, 39)
-TextButton.Visible = false
-TextButton.Font = Enum.Font.SourceSans
-TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextButton.TextSize = 20.000
-TextButton.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-TextButton.TextStrokeTransparency = 0.000
-TextButton.TextWrapped = true
-
-TextLabel.Parent = Frame
-TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.Position = UDim2.new(-0.00129664713, 0, -0.000140406293, 0)
-TextLabel.Size = UDim2.new(0, 218, 0, 25)
-TextLabel.Font = Enum.Font.SourceSans
-TextLabel.Text = "Tool Giver"
-TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.TextSize = 14.000
-
-TextButton_2.Parent = Frame
-TextButton_2.BackgroundColor3 = Color3.fromRGB(0, 255, 30)
-TextButton_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextButton_2.Position = UDim2.new(0.0825688094, 0, 0.804444432, 0)
-TextButton_2.Size = UDim2.new(0, 180, 0, 30)
-TextButton_2.Font = Enum.Font.SourceSans
-TextButton_2.Text = "update list"
-TextButton_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextButton_2.TextSize = 14.000
-
-local function FNDR_fake_script() -- Frame.LocalScript 
-	local script = Instance.new('LocalScript', Frame)
-
-	local button = script.Parent.ScrollingFrame.TextButton
-	button.Parent = nil
-	button.Name = "slaves"
-	local function updatelist()
-		for i, v in script.Parent.ScrollingFrame:GetDescendants() do
-			if v:IsA("TextButton") then
-				v:Destroy()
-			end
-		end
-	
-		local function cloneToBackpack(toolName)
-			local clonedTool = toolName:Clone()
-			clonedTool.Parent = game:GetService("Players").LocalPlayer:WaitForChild("Backpack")
-		end
-		for i, v in pairs(game:GetDescendants()) do
-			if v:IsA("Tool") and v.Parent.Parent ~= game:GetService("Players").LocalPlayer then
-				local clonebutton = button:Clone()
-				clonebutton.Parent = script.Parent.ScrollingFrame
-				clonebutton.Visible = true
-				clonebutton.Text = v.Name
-				clonebutton.MouseButton1Click:Connect(function()
-					cloneToBackpack(v)
-				end)
-			end
-		end
-	end
-	script.Parent.TextButton.MouseButton1Click:Connect(updatelist)
-end
-coroutine.wrap(FNDR_fake_script)()
-local function SGRWUDK_fake_script() -- Frame.DragScript 
-	local script = Instance.new('LocalScript', Frame)
-
-	local UIS = game:GetService('UserInputService')
-	local frame = script.Parent
-	local dragToggle = nil
-	local dragSpeed = 0
-	local dragStart = nil
-	local startPos = nil
-	
-	local function updateInput(input)
-		local delta = input.Position - dragStart
-		local position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		game:GetService('TweenService'):Create(frame, TweenInfo.new(dragSpeed), {
-			Position = position
-		}):Play()
-	end
-	
-	frame.InputBegan:Connect(function(input)
-		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
-			dragToggle = true
-			dragStart = input.Position
-			startPos = frame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragToggle = false
-				end
-			end)
-		end
-	end)
-	
-	UIS.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			if dragToggle then
-				updateInput(input)
-			end
-		end
-	end)
-	
-end
-coroutine.wrap(SGRWUDK_fake_script)()
-end)
-
-Section3:NewButton("ชักว่าว R6", "", function()
-loadstring(game:HttpGet("https://pastefy.app/3q0ZUYSV/raw"))()
-end)
-
-local player = game.Players.LocalPlayer
-local runService = game:GetService("RunService")
-
 local flingActive = false
 local spinSpeed = 5000
-runService.Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function()
     if flingActive and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local root = player.Character.HumanoidRootPart
         local hum = player.Character:FindFirstChildOfClass("Humanoid")
         local oldRotVel = root.RotVelocity
         root.RotVelocity = Vector3.new(0, spinSpeed, 0)
         
-        runService.RenderStepped:Wait()
+        RunService.RenderStepped:Wait()
         root.RotVelocity = oldRotVel
         if hum then
             if hum:GetState() == Enum.HumanoidStateType.FallingDown or hum:GetState() == Enum.HumanoidStateType.Ragdoll then
@@ -438,40 +100,275 @@ runService.Heartbeat:Connect(function()
     end
 end)
 
-Section3:NewToggle("เดินชนกระเด็น (ใช้ได้สำหรับแมพที่เดินชนกันได้เท่านั้น)", "", function(state)
-    flingActive = state
-    if state then
-    else
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Window = WindUI:CreateWindow({
+    Title = "TEST HUB | รวมหลายฟังก์ชันฟรี",
+    Icon = "rbxassetid://117649776522765",
+    Author = "TEST HUB",
+    Folder = "TESTHUB_MM2",
+    Size = UDim2.fromOffset(550, 420),
+    Theme = "Dark",
+    Transparent = true,
+    Resizable = true,
+})
+
+local Tab1 = Window:Tab({ Title = "ผู้เล่น", Icon = "user" })
+local Tab2 = Window:Tab({ Title = "บิน", Icon = "plane" })
+local Tab3 = Window:Tab({ Title = "เกรียน", Icon = "zap" })
+local Tab4 = Window:Tab({ Title = "อธิบาย + ตั้งค่า", Icon = "info" })
+
+Tab1:Input({
+    Title = "ปรับค่าวิ่งไว",
+    Value = "",
+    Placeholder = "ใส่ความเร็ว...",
+    Type = "Input",
+    Callback = function(txt)
+        local speed = tonumber(txt) 
+        if speed then
+            player.Character.Humanoid.WalkSpeed = speed
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "รีเซ็ตค่าวิ่งเร็วให้เหลือ 16",
+    Callback = function()
+        player.Character.Humanoid.WalkSpeed = 16
+    end
+})
+
+Tab1:Input({
+    Title = "ปรับค่ากระโดดสูง",
+    Value = "",
+    Placeholder = "ใส่ค่ากระโดด...",
+    Type = "Input",
+    Callback = function(txt)
+        local jump = tonumber(txt)
+        if jump then
+            local hum = player.Character.Humanoid
+            hum.UseJumpPower = true
+            hum.JumpPower = jump
+        end
+    end
+})
+
+Tab1:Button({
+    Title = "รีเซ็ตค่ากระโดดสูงให้เหลือ 50",
+    Callback = function()
+        player.Character.Humanoid.JumpPower = 50
+    end
+})
+
+Tab1:Toggle({
+    Title = "กระโดดได้ไม่จำกัด",
+    Value = false,
+    Callback = function(state)
+        infiniteJumpActive = state
+    end
+})
+
+Tab1:Toggle({
+    Title = "เดินทะลุกำแพง",
+    Value = false,
+    Callback = function(state)
+        noclipActive = state
+        if not state and player.Character then
+            for _, part in pairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+})
+
+Tab2:Button({
+    Title = "บินแบบ FLY GUI V3 ไม่ทะลุกำแพง",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/2RiADZZu"))()
+    end
+})
+
+Tab2:Button({
+    Title = "บินแบบ FLY GUI V4 ไม่ทะลุกำแพง",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/n6Q5TNyg"))()
+    end
+})
+
+Tab2:Toggle({
+    Title = "บินแบบปกติไม่ทะลุกำแพง",
+    Value = false,
+    Callback = function(state)
+        toggleFly(state)
+    end
+})
+
+Tab2:Input({
+    Title = "ปรับความเร็วบินแบบปกติ",
+    Value = tostring(speed),
+    Placeholder = "ใส่ความเร็วบิน...",
+    Type = "Input",
+    Callback = function(txt)
+        local s = tonumber(txt)
+        if s then speed = s end
+    end
+})
+
+Tab3:Button({
+    Title = "เสกของ",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/WPpPKCHE"))()
+    end
+})
+
+Tab3:Button({
+    Title = "ชักว่าว R6",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/3q0ZUYSV/raw"))()
+    end
+})
+
+Tab3:Toggle({
+    Title = "เดินชนกระเด็น",
+    Desc = "ใช้ได้สำหรับแมพที่เดินชนกันได้เท่านั้น",
+    Value = false,
+    Callback = function(state)
+        flingActive = state
+    end
+})
+
+local fpsLabel = Tab4:Paragraph({
+    Title = "FPS: กำลังคำนวณ...",
+    Desc = "สคริปต์สร้างโดย TEST HUB"
+})
+
+Tab4:Button({
+    Title = "คัดลอกลิงค์ Discord",
+    Desc = "คัดลอกลิงค์กลุ่ม Discord ไว้ในคลิปบอร์ด",
+    Callback = function()
+        if setclipboard then
+            setclipboard("https://discord.gg/Ttwq9Udwhc")
+        elseif syn and syn.write_clipboard then
+            syn.write_clipboard("https://discord.gg/Ttwq9Udwhc")
+        end
+        game:GetService("StarterGui"):SetCore("SendNotification", { 
+            Title = "คัดลอกสำเร็จ",
+            Text = "คัดลอกลิงค์ Discord แล้ว",
+            Duration = 5,
+        })
+    end
+})
+
+Tab4:Button({
+    Title = "บูส FPS ลดแสงนิด",
+    Callback = function()
+        local l = game.Lighting
+        l.GlobalShadows = true
+        l.Brightness = 1
+        l.FogEnd = 10000
+    end
+})
+
+Tab4:Button({
+    Title = "บูส FPS ภาพเดิม",
+    Callback = function()
+        local l = game.Lighting
+        l.GlobalShadows = true
+        l.Brightness = 2
+        l.FogEnd = 100000
+    end
+})
+
+local lastTime = os.clock()
+local frameCount = 0
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local currentTime = os.clock()
+    if currentTime - lastTime >= 0.3 then
+        local fps = math.floor(frameCount / (currentTime - lastTime))
+        fpsLabel:SetTitle("FPS: " .. fps)
+        lastTime = currentTime
+        frameCount = 0
     end
 end)
 
-Section4:NewButton("คัดลอกลิงค์ Discord", "คัดลอกลิงค์กลุ่ม Discord ไว้ในคลิปบอร์ด", function()
-    if setclipboard then
-        setclipboard("https://discord.gg/Ttwq9Udwhc")
-    elseif syn and syn.write_clipboard then
-        syn.write_clipboard("https://discord.gg/Ttwq9Udwhc")
-    else
-    end
+local function createToggleButton(imageAsset)
+    if getgenv().OpenGuiButton then getgenv().OpenGuiButton:Destroy() end
+    
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "ToggleGui_Kaprao"
+    gui.Parent = (gethui and gethui()) or player:WaitForChild("PlayerGui")
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 35, 0, 35)
+    frame.Position = UDim2.new(0, 20, 0, 150)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BackgroundTransparency = 0.1
+    frame.Active = true
+    
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 8) 
+    
+    local btn = Instance.new("ImageButton", frame)
+    btn.Size = UDim2.new(0, 23, 0, 23)
+    btn.Position = UDim2.new(0, 6, 0, 6)
+    btn.BackgroundTransparency = 1
+    btn.Image = imageAsset
+    
+    local dragging, dragStart, startPos
+    local hasDragged = false
+    
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            hasDragged = false
+        end
+    end)
 
-    game:GetService("StarterGui"):SetCore("SendNotification", { 
-        Title = "คัดลอกสำเร็จ";
-        Text = "คัดลอกลิงค์ Discord แล้ว";
-        Duration = 5;
-    })
-end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            if delta.Magnitude > 7 then hasDragged = true end
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
 
-Section4:NewButton("บูส FPS ลดแสงนิด", "", function()
-    local g = game
-    local l = g.Lighting
-    l.GlobalShadows = true
-    l.Brightness = 1
-    l.FogEnd = 10000
-end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
 
-Section4:NewButton("บูส FPS ภาพเดิม", "", function()
-    local g = game
-    local l = g.Lighting
-    l.GlobalShadows = true
-    l.Brightness = 2
-    l.FogEnd = 100000
-end)
+    btn.Activated:Connect(function()
+        if not hasDragged then
+            local customToggleUsed = false
+            pcall(function()
+                if Window and Window.Toggle then
+                    Window:Toggle()
+                    customToggleUsed = true
+                end
+            end)
+            if not customToggleUsed then
+                for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+                    if v:IsA("ScreenGui") and (v.Name == "WindUI" or v:FindFirstChild("Main") or string.find(v.Name, "Wind")) then
+                        v.Enabled = not v.Enabled
+                    end
+                end
+                for _, v in pairs(player:WaitForChild("PlayerGui"):GetChildren()) do
+                    if v:IsA("ScreenGui") and (v.Name == "WindUI" or v:FindFirstChild("Main") or string.find(v.Name, "Wind")) then
+                        v.Enabled = not v.Enabled
+                    end
+                end
+            end
+        end
+    end)
+    
+    getgenv().OpenGuiButton = gui
+end
+
+createToggleButton("rbxassetid://117649776522765")
