@@ -114,7 +114,7 @@ local Window = WindUI:CreateWindow({
 
 local Tab1 = Window:Tab({ Title = "ผู้เล่น", Icon = "user" })
 local Tab2 = Window:Tab({ Title = "บิน", Icon = "plane" })
-local Tab3 = Window:Tab({ Title = "เกรียน", Icon = "zap" })
+local Tab3 = Window:Tab({ Title = "เกรียน", Icon = "swords" })
 local Tab4 = Window:Tab({ Title = "อธิบาย + ตั้งค่า", Icon = "info" })
 
 Tab1:Input({
@@ -192,7 +192,8 @@ Tab2:Button({
 Tab2:Button({
     Title = "บินแบบ FLY GUI V4 ไม่ทะลุกำแพง",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/n6Q5TNyg"))()
+        getgenv().noclipfly = false
+        loadstring(game:HttpGet("https://pastebin.com/raw/Uay3DAVt"))()
     end
 })
 
